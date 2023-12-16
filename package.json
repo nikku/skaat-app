@@ -15,8 +15,8 @@
     "sirv-cli": "^2.0.2"
   },
   "dependencies": {
-    "skaat": "0.0.5",
-    "skaat-deck": "0.0.1",
+    "skaat": "^0.1.1",
+    "skaat-deck": "^0.0.2",
     "svelte": "^4.2.8"
   },
   "scripts": {
