@@ -7,6 +7,9 @@
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
+    "eslint": "^8.56.0",
+    "eslint-plugin-bpmn-io": "^1.0.0",
+    "eslint-plugin-svelte": "^2.35.1",
     "npm-run-all": "^4.1.5",
     "open-cli": "^7.2.0",
     "rollup": "^4.9.0",
@@ -20,11 +23,12 @@
     "svelte": "^4.2.8"
   },
   "scripts": {
+    "lint": "eslint .",
     "build": "rollup -c",
     "build:dev": "npm run build -- -w",
     "dev": "run-p build:dev start:dev open",
     "open": "open 'http://localhost:8080'",
-    "all": "run-s build",
+    "all": "run-s lint build",
     "start": "sirv public",
     "start:dev": "sirv public --dev"
   },

@@ -1,0 +1,19 @@
+{
+  "extends": [
+    "plugin:bpmn-io/recommended",
+    "plugin:svelte/recommended"
+  ],
+  "overrides": [
+    {
+      "files": ["*.svelte"],
+      "parser": "svelte-eslint-parser"
+    }
+  ],
+  "rules": {
+    "svelte/no-at-html-tags": "warn",
+    "svelte/valid-compile": "warn"
+  },
+  "parserOptions": {
+    "ecmaVersion": 2020
+  }
+}

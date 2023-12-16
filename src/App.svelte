@@ -1,27 +1,27 @@
 <script>
-  import Action from "./Action.svelte";
+  import Action from './Action.svelte';
 
-  import { Game, Automa, Grand, semanticSort } from "skaat";
+  import { Game, Automa, Grand, semanticSort } from 'skaat';
 
-  import { bySymbol } from "skaat-deck";
+  import { bySymbol } from 'skaat-deck';
 
-  const YOU = "You";
+  const YOU = 'You';
 
   const suites = [
-    ["♣", "♣"],
-    ["♠", "♠"],
-    ["♥", "♥"],
-    ["♦", "♦"],
-    ["G", "Grand"],
-    ["N", "Null"]
+    [ '♣', '♣' ],
+    [ '♠', '♠' ],
+    [ '♥', '♥' ],
+    [ '♦', '♦' ],
+    [ 'G', 'Grand' ],
+    [ 'N', 'Null' ]
   ];
 
-  const bids = [18, 20, 22, 23, 24, 27, 30, 33, 35, 36, 40, 44, 46, 48, 50];
+  const bids = [ 18, 20, 22, 23, 24, 27, 30, 33, 35, 36, 40, 44, 46, 48, 50 ];
 
   let participants = [
-    [0, "Walt", new Automa()],
-    [1, "Mary", new Automa()],
-    [2, YOU]
+    [ 0, 'Walt', new Automa() ],
+    [ 1, 'Mary', new Automa() ],
+    [ 2, YOU ]
   ];
 
   let players;
@@ -38,21 +38,21 @@
   let lastActions;
 
   function t(...args) {
-    trace = [...trace, args];
+    trace = [ ...trace, args ];
   }
 
   function pl(player) {
-    return (typeof player === "number" && players[player][1]) || "NONE";
+    return (typeof player === 'number' && players[player][1]) || 'NONE';
   }
 
   function next(step, ...args) {
-    t("+", pl(player), step, ...args);
+    t('+', pl(player), step, ...args);
 
     try {
-      if (typeof player === "number") {
+      if (typeof player === 'number') {
         lastActions = [
           ...lastActions.slice(0, player),
-          [step, ...args],
+          [ step, ...args ],
           ...lastActions.slice(player + 1)
         ];
       }
@@ -65,20 +65,20 @@
       state = game.state;
 
       if (
-        (action === "play-card" && state.currentTrick.length === 0) ||
-        action === "ask-declare" ||
-        action === "end"
+        (action === 'play-card' && state.currentTrick.length === 0) ||
+        action === 'ask-declare' ||
+        action === 'end'
       ) {
-        lastActions = [null, null, null];
+        lastActions = [ null, null, null ];
       }
 
-      const automa = typeof player === "number" && players[player][2];
+      const automa = typeof player === 'number' && players[player][2];
 
-      t("?", pl(player), action, automa ? "A" : "");
+      t('?', pl(player), action, automa ? 'A' : '');
 
       if (automa) {
         schedule(() => {
-          const [s, ...args] = automa.next(game, action, player);
+          const [ s, ...args ] = automa.next(game, action, player);
 
           next(s, ...args);
         });
@@ -105,7 +105,7 @@
 
     error = err.message;
 
-    t("!", error);
+    t('!', error);
   }
 
   function color(card) {
@@ -113,19 +113,19 @@
   }
 
   function selectCard(action, card) {
-    if (action === "ask-skat") {
+    if (action === 'ask-skat') {
       return event => {
         selectedCards = selectedCards.includes(card)
           ? selectedCards.filter(c => c !== card)
-          : [...selectedCards, card];
+          : [ ...selectedCards, card ];
       };
     }
   }
 
   function playCard(action, card) {
-    if (action === "ask-card" && players[player][1] === YOU) {
+    if (action === 'ask-card' && players[player][1] === YOU) {
       return event => {
-        next("play-card", card);
+        next('play-card', card);
       };
     }
   }
@@ -147,13 +147,13 @@
 
     players = participants.slice().sort((a, b) => a[0] - b[0]);
 
-    lastActions = [null, null, null];
+    lastActions = [ null, null, null ];
 
     game = new Game({ verbose: true });
 
-    t("~", players.map(p => p[1]).join(" "));
+    t('~', players.map(p => p[1]).join(' '));
 
-    next("start");
+    next('start');
   }
 
   let logExpanded = false;
@@ -175,7 +175,7 @@
 
   <div class="table">
 
-    {#each participants as [playerIdx, name], participantIndex}
+    {#each participants as [ playerIdx, name ], participantIndex}
 
       <div class="player player-{participantIndex}">
         <h3 class="name">
@@ -230,7 +230,7 @@
           <h3>Point Changes</h3>
           <pre>
             {#each state.result.points as points, player}
-              { players[player][1] }: { points.reduce((sum, [n, p]) => sum + p, 0) }<br/>
+              { players[player][1] }: { points.reduce((sum, [ n, p ]) => sum + p, 0) }<br/>
             {/each}
           </pre>
         </div>
@@ -301,7 +301,7 @@
             {/if}
 
             <p>
-              {#each suites as [key, label]}
+              {#each suites as [ key, label ]}
               <button on:click|preventDefault={ () => next('declare', { suit: key }) }>
                 { label }
               </button>
@@ -353,7 +353,7 @@
             {:else}
           <svg xmlns="http://www.w3.org/2000/svg"
             on:click|stopPropagation|preventDefault={ selectCard(action, card) }
-            class="select" viewBox="0 0 24 24" width="24" height="24"><path d="M17.28 9.28a.75.75 0 00-1.06-1.06l-5.97 5.97-2.47-2.47a.75.75 0 00-1.06 1.06l3 3a.75.75 0 001.06 0l6.5-6.5z"></path><path fill-rule="evenodd" d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1zM2.5 12a9.5 9.5 0 1119 0 9.5 9.5 0 01-19 0z"></path></svg>            {/if}
+            class="select" viewBox="0 0 24 24" width="24" height="24"><path d="M17.28 9.28a.75.75 0 00-1.06-1.06l-5.97 5.97-2.47-2.47a.75.75 0 00-1.06 1.06l3 3a.75.75 0 001.06 0l6.5-6.5z"></path><path fill-rule="evenodd" d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1zM2.5 12a9.5 9.5 0 1119 0 9.5 9.5 0 01-19 0z"></path></svg> {/if}
           {/if}
         </span>
       {/each}
