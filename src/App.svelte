@@ -613,13 +613,4 @@
   .log.expanded {
     height: 8em;
   }
-
-  .btn {
-    padding: 0;
-  }
-
-  .btn-none {
-    border: none;
-    background: transparent;
-  }
 </style>
