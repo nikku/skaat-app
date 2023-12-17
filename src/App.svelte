@@ -16,7 +16,13 @@
     [ 'N', 'Null' ]
   ];
 
-  const bids = [ 18, 20, 22, 23, 24, 27, 30, 33, 35, 36, 40, 44, 46, 48, 50 ];
+  const bids = [
+    18, 20, 22, 23, 24,
+    27, 30, 33, 35, 36,
+    40, 44, 46, 48, 50,
+    55, 57, 60, 65, 66,
+    70
+  ];
 
   let participants = [
     [ 0, 'Walt', new Automa() ],
@@ -34,6 +40,8 @@
   let action;
   let player;
   let state = {};
+
+  let suit = null;
 
   let lastActions;
 
@@ -108,6 +116,18 @@
     t('!', error);
   }
 
+  function setSuit(_suit) {
+    suit = _suit;
+  }
+
+  function declare() {
+    try {
+      return next('declare', { suit });
+    } finally {
+      suit = null;
+    }
+  }
+
   function color(card) {
     return card[0];
   }
@@ -132,7 +152,7 @@
 
   $: cards = semanticSort(
     state.hands[participants[2][0]],
-    state.game?.suit || Grand
+    state.game?.suit || suit || Grand
   );
 
   $: selectedCards =
@@ -207,19 +227,19 @@
 
     <div class="table-center">
 
-      {#if action === 'ask-card'}
+      {#if action === 'ask-card' || action === 'end'}
 
         <div class="tricks">
           {#each ((state.currentTrick.length || !state.lastTrick) ? state.currentTrick : state.lastTrick) as trick}
             <span
-                  class="card card-{color(trick[1])}"
-                  title={ `Played by ${ players[trick[0]][1]}` }
+              class="card card-{color(trick[1])}"
+              title={ `Played by ${ players[trick[0]][1]}` }
             >{@html bySymbol[trick[1]] }</span>
           {/each}
         </div>
       {/if}
 
-      {#if action === 'end' && state.result }
+      {#if action === 'ended' && state.result }
         <div class="results">
           <h2>Game Ended</h2>
 
@@ -238,13 +258,19 @@
 
       {#if action === 'ask-declare' && player === null}
         <p class="notice">
-          Everybody passed. What a pitty! <button on:click={ () => nextGame() }>Go next</button>
+          Everybody passed. What a pitty! <button class="btn" on:click={ () => nextGame() }>Go next</button>
         </p>
       {/if}
 
       {#if action === 'end'}
         <p class="notice">
-          Continue playing? <button on:click={ () => nextGame() }>Go next</button>
+          Game finished. <button class="btn" on:click={ () => action = 'ended' }>View Results</button>
+        </p>
+      {/if}
+
+      {#if action === 'ended'}
+        <p class="notice">
+          Continue playing? <button class="btn" on:click={ () => nextGame() }>Go next</button>
         </p>
       {/if}
 
@@ -263,11 +289,14 @@
 
               <p>
                 <input type="number" name="bid" value={ bids.find(b => b > (state.bidding.bid || 17)) || state.bidding.bid } />
-                <button>
+                <button class="btn">
                   Bid
                 </button>
 
-                <button on:click|preventDefault={ (event) => next('pass') } type="button">
+                <button
+                  class="btn"
+                  on:click|preventDefault={ (event) => next('pass') } type="button"
+                >
                   Pass
                 </button>
               </p>
@@ -280,10 +309,16 @@
             </p>
 
             <p>
-              <button on:click|preventDefault={ (event) => next('ack') }>
+              <button
+                class="btn"
+                on:click|preventDefault={ (event) => next('ack') }
+              >
                 Ack
               </button>
-              <button on:click|preventDefault={ (event) => next('pass') }>
+              <button
+                class="btn"
+                on:click|preventDefault={ (event) => next('pass') }
+              >
                 Pass
               </button>
             </p>
@@ -294,18 +329,33 @@
               You won the bidding at <strong>{ state.bidding.bid }</strong>. What would you like to play?
             </p>
 
-            {#if state.skat.length }
-              <p>
-                <button on:click|preventDefault={ () => next('pick-skat') }>Pick Skat</button>
-              </p>
-            {/if}
-
             <p>
               {#each suites as [ key, label ]}
-              <button on:click|preventDefault={ () => next('declare', { suit: key }) }>
-                { label }
-              </button>
+                <button
+                  on:click|preventDefault={ () => setSuit(key) }
+                  class:btn-primary={ key === suit }
+                  class="btn"
+                >
+                  { label }
+                </button>
               {/each}
+            </p>
+
+            <p>
+              {#if state.skat.length }
+                <button
+                  class="btn"
+                  on:click|preventDefault={ () => next('pick-skat') }
+                >Pick Skat</button>
+              {/if}
+
+              <button
+                class="btn btn-primary"
+                disabled={ !suit }
+                on:click|preventDefault={ declare }
+              >
+                Declare
+              </button>
             </p>
           {/if}
 
@@ -315,7 +365,23 @@
             </p>
 
             <p>
-              <button disabled={ selectedCards.length !== 2 } on:click|preventDefault={ () => next('put-skat', selectedCards) }>Put Skat</button>
+              {#each suites as [ key, label ]}
+                <button
+                  on:click|preventDefault={ () => setSuit(key) }
+                  class="btn"
+                  class:btn-primary={ key === suit }
+                >
+                  { label }
+                </button>
+              {/each}
+            </p>
+
+            <p>
+              <button
+                class="btn btn-primary"
+                disabled={ selectedCards.length !== 2 }
+                on:click|preventDefault={ () => next('put-skat', selectedCards) }
+              >Put Skat</button>
             </p>
           {/if}
 
@@ -332,48 +398,15 @@
   {#if cards}
     <p class="hand">
       {#each cards as card}
-        <span
-              class="card card-{color(card)}"
-              class:interactive={ selectCard(card) || playCard(card) }
-              class:selected={ selectedCards.includes(card) }
+        <button
+          class="btn btn-none card card-{color(card)}"
+          class:interactive={ selectCard(action, card) || playCard(action, card) }
+          class:selected={ selectedCards.includes(card) }
+          disabled={ !selectCard(action, card) && !playCard(action, card) }
+          on:click={ selectCard(action, card) || playCard(action, card) }
         >
           {@html bySymbol[card] }
-
-          {#if playCard(action, card)}
-            <button
-              class="btn btn-none play"
-              on:click|stopPropagation|preventDefault={ playCard(action, card) }
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M9.5 15.584V8.416a.5.5 0 01.77-.42l5.576 3.583a.5.5 0 010 .842l-5.576 3.584a.5.5 0 01-.77-.42z"></path>
-                <path d="M12 2.5a9.5 9.5 0 100 19 9.5 9.5 0 000-19zM1 12C1 5.925 5.925 1 12 1s11 4.925 11 11-4.925 11-11 11S1 18.075 1 12z"></path>
-              </svg>
-            </button>
-          {/if}
-
-          {#if selectCard(action, card) }
-            {#if !selectedCards.includes(card) }
-              <button
-                class="btn btn-none select"
-                on:click|stopPropagation|preventDefault={ selectCard(action, card) }
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2.5a9.5 9.5 0 100 19 9.5 9.5 0 000-19zM1 12C1 5.925 5.925 1 12 1s11 4.925 11 11-4.925 11-11 11S1 18.075 1 12z"></path>
-                </svg>
-              </button>
-            {:else}
-              <button
-                class="btn btn-none select"
-                on:click|stopPropagation|preventDefault={ selectCard(action, card) }
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M17.28 9.28a.75.75 0 00-1.06-1.06l-5.97 5.97-2.47-2.47a.75.75 0 00-1.06 1.06l3 3a.75.75 0 001.06 0l6.5-6.5z"></path>
-                  <path d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1zM2.5 12a9.5 9.5 0 1119 0 9.5 9.5 0 01-19 0z"></path>
-                </svg>
-              </button>
-            {/if}
-          {/if}
-        </span>
+        </button>
       {/each}
     </p>
   {/if}
@@ -452,45 +485,32 @@
     background: white;
     border-radius: 0.25em;
     margin: 0.2em;
+    padding: 0;
     overflow: hidden;
     position: relative;
+    transition: margin ease .2s;
   }
 
-  .card .select,
-  .card .play {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgb(255, 255, 255);
-    border-radius: 50%;
-    width: 50%;
-    height: auto;
-    display: none;
+  .card {
+    margin-left: -1.5em;
+    margin-right: -1.5em;
   }
 
-  .card .select svg,
-  .card .play svg {
-    width: 100%;
-    display: block;
-    padding: 0;
-    margin: 0;
+  .card.selected,
+  .card:focus,
+  .card:hover {
+    margin-top: -.5em;
+    margin-bottom: 1em;
   }
 
-  .card:hover .play,
-  .card:hover .select,
-  .card.selected .select {
-    display: block;
+  .card:focus,
+  .card:hover {
+    margin-right: .5em;
   }
 
-  .card.selected .select:hover,
-  .card .play:hover {
-    color: #333;
-    background: rgb(255, 255, 255, 1);
-  }
-
-  .card.selected .select {
-    color: steelblue;
+  .card:focus:last-child,
+  .card:hover:last-child {
+    margin-right: -1.5em;
   }
 
   :global(.card svg) {
@@ -498,18 +518,12 @@
     height: 100%;
   }
 
+  .card.interactive {
+    box-shadow: 0 0 0 2px #fff0c4;
+  }
+
   .card.selected {
-    border: solid 5px #999;
-    margin: calc(0.2em - 4px);
-  }
-
-  .card.interactive:hover {
-    border-width: 5px;
-    margin: calc(0.2em - 4px);
-  }
-
-  .card.selected:hover {
-    border-color: steelblue;
+    box-shadow: 0 0 0 4px #88c9ff;
   }
 
   .table {
@@ -572,7 +586,8 @@
   }
 
   .player-action {
-    background: #ffc107;
+    border: solid 3px #ffc107;
+    background: #fff6db;
     padding: 0 1em;
     border-radius: 5px;
   }
