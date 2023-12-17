@@ -340,20 +340,38 @@
           {@html bySymbol[card] }
 
           {#if playCard(action, card)}
-            <svg xmlns="http://www.w3.org/2000/svg"
+            <button
+              class="btn btn-none play"
               on:click|stopPropagation|preventDefault={ playCard(action, card) }
-              class="play" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M9.5 15.584V8.416a.5.5 0 01.77-.42l5.576 3.583a.5.5 0 010 .842l-5.576 3.584a.5.5 0 01-.77-.42z"></path><path fill-rule="evenodd" d="M12 2.5a9.5 9.5 0 100 19 9.5 9.5 0 000-19zM1 12C1 5.925 5.925 1 12 1s11 4.925 11 11-4.925 11-11 11S1 18.075 1 12z"></path></svg>
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9.5 15.584V8.416a.5.5 0 01.77-.42l5.576 3.583a.5.5 0 010 .842l-5.576 3.584a.5.5 0 01-.77-.42z"></path>
+                <path d="M12 2.5a9.5 9.5 0 100 19 9.5 9.5 0 000-19zM1 12C1 5.925 5.925 1 12 1s11 4.925 11 11-4.925 11-11 11S1 18.075 1 12z"></path>
+              </svg>
+            </button>
           {/if}
 
           {#if selectCard(action, card) }
             {#if !selectedCards.includes(card) }
-              <svg xmlns="http://www.w3.org/2000/svg"
+              <button
+                class="btn btn-none select"
                 on:click|stopPropagation|preventDefault={ selectCard(action, card) }
-                class="select" viewBox="0 0 24 24" width="24" height="24"><path fill-rule="evenodd" d="M12 2.5a9.5 9.5 0 100 19 9.5 9.5 0 000-19zM1 12C1 5.925 5.925 1 12 1s11 4.925 11 11-4.925 11-11 11S1 18.075 1 12z"></path></svg>
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2.5a9.5 9.5 0 100 19 9.5 9.5 0 000-19zM1 12C1 5.925 5.925 1 12 1s11 4.925 11 11-4.925 11-11 11S1 18.075 1 12z"></path>
+                </svg>
+              </button>
             {:else}
-          <svg xmlns="http://www.w3.org/2000/svg"
-            on:click|stopPropagation|preventDefault={ selectCard(action, card) }
-            class="select" viewBox="0 0 24 24" width="24" height="24"><path d="M17.28 9.28a.75.75 0 00-1.06-1.06l-5.97 5.97-2.47-2.47a.75.75 0 00-1.06 1.06l3 3a.75.75 0 001.06 0l6.5-6.5z"></path><path fill-rule="evenodd" d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1zM2.5 12a9.5 9.5 0 1119 0 9.5 9.5 0 01-19 0z"></path></svg> {/if}
+              <button
+                class="btn btn-none select"
+                on:click|stopPropagation|preventDefault={ selectCard(action, card) }
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.28 9.28a.75.75 0 00-1.06-1.06l-5.97 5.97-2.47-2.47a.75.75 0 00-1.06 1.06l3 3a.75.75 0 001.06 0l6.5-6.5z"></path>
+                  <path d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1zM2.5 12a9.5 9.5 0 1119 0 9.5 9.5 0 01-19 0z"></path>
+                </svg>
+              </button>
+            {/if}
           {/if}
         </span>
       {/each}
@@ -445,11 +463,18 @@
     left: 50%;
     transform: translate(-50%, -50%);
     background: rgb(255, 255, 255);
-    color: #777;
     border-radius: 50%;
     width: 50%;
     height: auto;
     display: none;
+  }
+
+  .card .select svg,
+  .card .play svg {
+    width: 100%;
+    display: block;
+    padding: 0;
+    margin: 0;
   }
 
   .card:hover .play,
@@ -587,5 +612,14 @@
 
   .log.expanded {
     height: 8em;
+  }
+
+  .btn {
+    padding: 0;
+  }
+
+  .btn-none {
+    border: none;
+    background: transparent;
   }
 </style>

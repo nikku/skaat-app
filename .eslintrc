@@ -10,8 +10,7 @@
     }
   ],
   "rules": {
-    "svelte/no-at-html-tags": "warn",
-    "svelte/valid-compile": "warn"
+    "svelte/no-at-html-tags": "warn"
   },
   "parserOptions": {
     "ecmaVersion": 2020
